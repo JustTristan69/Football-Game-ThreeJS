@@ -1,0 +1,159 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+    <meta name="theme-color" content="#07101d">
+    <meta name="description" content="A fast, original anime-inspired 3D football game with a phone-as-controller mode.">
+    <title>Neon Strikers — Arcade Football RPG</title>
+    <link rel="stylesheet" href="./style.css">
+    <script type="importmap">
+      {
+        "imports": {
+          "three": "https://cdn.jsdelivr.net/npm/three@0.166.1/build/three.module.js"
+        }
+      }
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/peerjs@1.5.4/dist/peerjs.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+  </head>
+  <body>
+    <main id="hostApp">
+      <div id="gameRoot" aria-label="Neon Strikers 3D football match"></div>
+      <div class="vignette" aria-hidden="true"></div>
+      <header class="topbar">
+        <a class="brand" href="#" aria-label="Neon Strikers home">
+          <span class="brand-mark">N</span>
+          <span>NEON<span class="brand-accent">STRIKERS</span></span>
+        </a>
+        <div class="topbar-right">
+          <span class="live-pill"><i></i> ARCADE FOOTBALL RPG</span>
+          <button id="soundToggle" class="icon-button" type="button" aria-label="Toggle sound">♫ <span>ON</span></button>
+        </div>
+      </header>
+
+      <section id="mainMenu" class="screen menu-screen">
+        <div class="hero-copy">
+          <div class="eyebrow"><span class="eyebrow-line"></span> YOUR TEAM. YOUR MOMENT.</div>
+          <h1>CHASE<br>THE <em>WIN.</em></h1>
+          <p>Assemble your lineup. Light up the pitch. Make every second legendary.</p>
+          <button id="startLobby" class="primary-button" type="button">
+            <span>START A MATCH</span><b aria-hidden="true">↗</b>
+          </button>
+          <div class="hero-footnote"><span class="keycap">W</span><span class="keycap">A</span><span class="keycap">S</span><span class="keycap">D</span> MOVE <span class="dot-separator">•</span> SPACE SHOOT <span class="dot-separator">•</span> E SPECIAL
+          </div>
+        </div>
+        <div class="hero-stamp" aria-hidden="true"><span>SEASON</span><strong>01</strong><i>★</i></div>
+        <div class="screen-corner">FIELD 01 <span>—</span> NIGHT LEAGUE</div>
+      </section>
+
+      <section id="lobbyScreen" class="screen" hidden>
+        <div class="panel panel-lobby">
+          <div class="eyebrow"><span class="eyebrow-line"></span> MATCH SETUP / 01</div>
+          <h2>BRING YOUR<br><em>SQUAD.</em></h2>
+          <p class="panel-copy">Scan with your phone to control your captain while the CPU plays the rest of the match. Or start a keyboard match on this screen.</p>
+          <div class="room-card">
+            <div id="qrCode" class="qr-code" aria-label="Controller join QR code"></div>
+            <div class="room-info">
+              <span class="label">ROOM CODE</span>
+              <strong id="roomCode">CONNECTING…</strong>
+              <span id="hostConnectionStatus" class="connection-status"><i></i> Starting room</span>
+              <a id="controllerLink" class="text-link" href="#">Open controller on this device ↗</a>
+            </div>
+          </div>
+          <div class="panel-actions">
+            <button id="soloMatch" class="primary-button" type="button"><span>PLAY VS CPU</span><b aria-hidden="true">↗</b></button>
+            <button id="toTeamSelect" class="secondary-button" type="button">CONTINUE <span>→</span></button>
+          </div>
+          <p class="tiny-note">Free phone testing: publish this folder with GitHub Pages, open its HTTPS URL here, then scan the QR code.</p>
+        </div>
+        <button id="lobbyBack" class="back-button" type="button">← BACK</button>
+      </section>
+
+      <section id="teamScreen" class="screen" hidden>
+        <div class="panel panel-teams">
+          <div class="eyebrow"><span class="eyebrow-line"></span> BUILD YOUR STARTING XI / 02</div>
+          <h2>CHOOSE YOUR<br><em>COLORS.</em></h2>
+          <div class="team-options">
+            <button class="team-card selected" type="button" data-team="nova" aria-pressed="true">
+              <span class="team-swatch nova-swatch"></span><span class="team-label">NOVA CITY</span><span class="team-sub">THE SKY-BLUE COMETS</span><span class="team-check">✓</span>
+            </button>
+            <button class="team-card" type="button" data-team="ember" aria-pressed="false">
+              <span class="team-swatch ember-swatch"></span><span class="team-label">EMBER UNITED</span><span class="team-sub">THE CRIMSON SPARKS</span><span class="team-check">✓</span>
+            </button>
+          </div>
+          <div class="panel-actions">
+            <button id="kickoffButton" class="primary-button" type="button"><span>TAKE THE FIELD</span><b aria-hidden="true">↗</b></button>
+            <button id="teamBack" class="secondary-button" type="button">← BACK</button>
+          </div>
+        </div>
+        <div class="screen-corner">KICKOFF IN <span>3… 2… 1…</span></div>
+      </section>
+
+      <section id="matchHud" class="match-hud" hidden>
+        <div class="scoreboard">
+          <span id="homeTeamShort" class="score-team">NOVA</span>
+          <strong id="homeScore">00</strong><span class="score-dash">:</span><strong id="awayScore">00</strong>
+          <span id="awayTeamShort" class="score-team away">EMBER</span>
+          <span id="matchClock" class="match-clock">02:00</span>
+        </div>
+        <div class="hud-top-right">
+          <span id="matchStatus" class="match-status"><i></i> MATCH LIVE</span>
+          <button id="pauseButton" class="pause-button" type="button" aria-label="Pause match">Ⅱ</button>
+        </div>
+        <div class="hud-bottom">
+          <div class="player-status">
+            <div class="player-avatar">✦</div><div class="player-detail"><span>CAPTAIN</span><strong>SKY RUNNER</strong></div>
+            <div class="tp-wrap"><div class="tp-label"><span>TP</span><b id="tpValue">100</b></div><div class="meter"><i id="tpMeter"></i></div></div>
+          </div>
+          <div class="controls-hint"><span class="keycap">WASD</span> MOVE <span class="dot-separator">•</span> <span class="keycap">J</span> PASS <span class="dot-separator">•</span> <span class="keycap">K</span> SHOOT <span class="dot-separator">•</span> <span class="keycap">L</span> TACKLE <span class="dot-separator">•</span> <span class="keycap">E</span> SPECIAL
+          </div>
+          <canvas id="miniMap" width="160" height="100" aria-label="Match mini-map"></canvas>
+        </div>
+        <div id="cinematic" class="cinematic" aria-live="assertive" hidden>
+          <div class="speed-lines"></div><div class="cinematic-copy"><span>SPECIAL TECHNIQUE</span><strong id="cinematicTitle">SOLAR CYCLONE!</strong><i>IGNITE THE IMPOSSIBLE</i></div>
+        </div>
+        <div id="pauseOverlay" class="pause-overlay" hidden>
+          <div class="pause-card"><span class="eyebrow">MATCH PAUSED</span><h2>TAKE A<br><em>BREATHER.</em></h2><button id="resumeButton" class="primary-button" type="button"><span>BACK TO MATCH</span><b>↗</b></button><button id="quitButton" class="secondary-button" type="button">END MATCH</button></div>
+        </div>
+      </section>
+
+      <section id="resultScreen" class="screen result-screen" hidden>
+        <div class="panel result-panel">
+          <div class="eyebrow"><span class="eyebrow-line"></span> FULL TIME / NIGHT LEAGUE</div>
+          <h2 id="resultTitle">WHAT A<br><em>MATCH.</em></h2>
+          <p id="resultSummary" class="panel-copy">The final whistle has blown.</p>
+          <div class="result-score"><span id="resultHomeName">NOVA CITY</span><strong id="resultHomeScore">00</strong><span>—</span><strong id="resultAwayScore">00</strong><span id="resultAwayName">EMBER UNITED</span></div>
+          <button id="rematchButton" class="primary-button" type="button"><span>PLAY AGAIN</span><b>↗</b></button>
+          <button id="homeButton" class="secondary-button" type="button">BACK TO HOME</button>
+        </div>
+      </section>
+
+      <div id="toast" class="toast" role="status" aria-live="polite"></div>
+    </main>
+
+    <main id="controllerApp" class="controller-app" hidden>
+      <div class="controller-top">
+        <div class="controller-brand"><span class="brand-mark">N</span><span>NEON<span class="brand-accent">STRIKERS</span></span></div>
+        <span id="controllerStatus" class="controller-status"><i></i> CONNECTING</span>
+      </div>
+      <div class="controller-matchline"><span id="controllerTeam">NOVA CITY</span><span id="controllerClock">READY</span><span id="controllerScore">0 — 0</span></div>
+      <div class="controller-stage">
+        <div class="joystick-zone" id="joystickZone" aria-label="Move player with joystick">
+          <div class="joystick-base"><div id="joystickKnob" class="joystick-knob"></div></div>
+          <span class="joy-hint">MOVE</span>
+        </div>
+        <div class="action-grid" aria-label="Football actions">
+          <button class="action-button pass-button" data-action="pass" type="button"><span class="action-icon">↗</span><span>PASS</span></button>
+          <button class="action-button shoot-button" data-action="shoot" type="button"><span class="action-icon">◎</span><span>SHOOT</span></button>
+          <button class="action-button tackle-button" data-action="tackle" type="button"><span class="action-icon">⌁</span><span>TACKLE</span></button>
+          <button class="action-button special-button" data-action="special" type="button"><span class="tp-ring"><i></i><b>⚡</b></span><span>SPECIAL</span></button>
+        </div>
+      </div>
+      <div class="controller-bottom"><span>HOLD & DRAG TO MOVE</span><span>HAPTICS <b>ON</b></span></div>
+      <div id="controllerError" class="controller-error" hidden></div>
+    </main>
+
+    <script type="module" src="./game.js"></script>
+  </body>
+</html>
